@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Accueil">
+<meta name="theme-color" content="#07070f">
+<title>Néon Dashboard</title>
+<style>
+:root{
+  --accent:#00f6ff;
+  --accent2:#ff2bd6;
+  --bg:#07070f;
+  --panel:rgba(16,18,34,.72);
+  --line:rgba(0,246,255,.25);
+  --ink:#eaf6ff;
+  --soft:rgba(234,246,255,.62);
+  --glowc:0 0 18px rgba(0,246,255,.35), inset 0 0 24px rgba(0,246,255,.06);
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+html{min-height:100%;background:var(--bg);box-sizing:border-box;-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100vh;color:var(--ink);
+  font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:
+    radial-gradient(1000px 600px at 85% -10%, rgba(255,43,214,.14), transparent 60%),
+    radial-gradient(900px 550px at -10% 110%, rgba(0,246,255,.13), transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  overflow-x:hidden;
+}
+/* grille futuriste animée en fond */
+body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background-image:linear-gradient(rgba(0,246,255,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(0,246,255,.05) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse at 50% 0%,#000 0%,transparent 75%);
+  -webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 0%,transparent 75%);
+  animation:grid 24s linear infinite;
+}
+@keyframes grid{from{background-position:0 0,0 0}to{background-position:0 44px,44px 0}}
+main{max-width:520px;margin:0 auto;padding:14px 16px 48px}
+button,input{font:inherit;color:var(--ink);-webkit-tap-highlight-color:transparent}
+/* Boutons uniformes et tactiles (≥ 48 px sur iPhone) */
+button{
+  min-height:48px;min-width:48px;padding:10px 18px;border-radius:14px;cursor:pointer;
+  background:rgba(16,18,34,.85);border:1px solid var(--line);transition:.2s;
+  font-size:16px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+button:hover{border-color:var(--accent);box-shadow:0 0 14px rgba(0,246,255,.35)}
+button:active{transform:scale(.97)}
+input{
+  min-height:48px;width:100%;background:rgba(8,10,22,.85);border:1px solid var(--line);border-radius:14px;
+  padding:11px 14px;font-size:16px; /* ≥16px : évite le zoom auto sur iOS */
+  caret-color:var(--accent);
+}
+input::placeholder{color:var(--soft)}
+input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 12px rgba(0,246,255,.35)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h2{
+  font-size:13px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;
+  margin:0 0 12px;color:var(--soft);display:flex;align-items:center;gap:10px;
+}
+h2::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+.note{color:var(--soft);margin:0 0 12px}
+.pri{background:linear-gradient(135deg,rgba(0,246,255,.18),rgba(255,43,214,.14));border-color:var(--accent);font-weight:600;box-shadow:0 0 16px rgba(0,246,255,.25)}
+.tw{background:linear-gradient(135deg,#9146ff,#6441a5);border-color:#9146ff;color:#fff;font-weight:600;box-shadow:0 0 16px rgba(145,70,255,.4)}
+.danger{border-color:rgba(255,60,90,.55);color:#ff8fa3}
+
+/* ---------- Accueil ---------- */
+.top{display:flex;align-items:center;gap:12px;padding:6px 0 18px}
+.who{flex:1;min-width:0}
+.greet{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);text-shadow:0 0 10px rgba(0,246,255,.6)}
+.who b{display:block;font-size:21px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.clock{text-align:right;line-height:1.15}
+.clock b{display:block;font-size:26px;font-weight:300;font-variant-numeric:tabular-nums;color:#fff;text-shadow:0 0 12px var(--accent)}
+.clock small{color:var(--soft)}
+#gear{width:48px;height:48px;padding:0;border-radius:50%;flex:none;display:grid;place-items:center}
+#gear svg{width:21px;height:21px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px var(--accent))}
+
+.panelcard{
+  background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:16px;margin-bottom:18px;
+  box-shadow:var(--glowc);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+.wcard{
+  display:flex;align-items:center;gap:12px;padding:18px;border-radius:22px;margin-bottom:18px;
+  cursor:pointer;
+}
+.wcard:hover{border-color:var(--accent);box-shadow:0 0 22px rgba(0,246,255,.35)}
+.wl{flex:1;min-width:0}
+.wcity{font-size:17px;font-weight:600;color:#fff}
+.wcond{margin-top:2px}
+.wmm{color:var(--soft);font-size:14px;margin-top:2px}
+.wt{font-size:48px;font-weight:200;line-height:1;letter-spacing:-2px;color:#fff;text-shadow:0 0 18px var(--accent)}
+.chev{font-size:24px;color:var(--accent);text-shadow:0 0 8px var(--accent)}
+
+.st{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(0,246,255,.14);color:inherit;text-decoration:none}
+.st:first-of-type{border-top:0}
+.st img{width:80px;height:45px;border-radius:8px;object-fit:cover;background:var(--line);flex:none}
+.st:hover b{color:var(--accent);text-shadow:0 0 8px var(--accent)}
+.si{flex:1;min-width:0}
+.si b,.si small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.si small{color:var(--soft)}
+.vw{font-size:13px;color:#ff5a8a;white-space:nowrap;text-shadow:0 0 8px rgba(255,90,138,.6)}
+
+/* Notes : liste minimaliste */
+#notesForm{display:flex;gap:8px;margin-bottom:12px}
+#notesForm input{flex:1;min-width:0}
+#notesList{display:flex;flex-direction:column}
+.ni{display:flex;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid rgba(0,246,255,.12)}
+.ni:first-child{border-top:0}
+.ni .ntext{flex:1;font-size:15px;color:var(--ink);word-break:break-word}
+.ni .ntext.done{text-decoration:line-through;color:var(--soft)}
+.ndel{min-height:36px;min-width:36px;height:36px;width:36px;padding:0;border-radius:50%;font-size:14px;color:var(--soft);border-color:rgba(0,246,255,.18)}
+.ndel:hover{border-color:#ff8fa3;color:#ff8fa3;box-shadow:none}
+.nempty{color:var(--soft);font-size:14px;padding:4px 2px}
+
+/* Détail météo */
+.nav{padding:6px 0 14px}
+.srch{display:flex;gap:8px;margin-bottom:20px}
+.srch input{flex:1;min-width:0}
+.srch button{width:48px;padding:0}
+.now{text-align:center;padding:24px 0 22px}
+.city{font-size:19px;font-weight:600;letter-spacing:.06em}
+.temp{font-size:88px;line-height:1;font-weight:200;letter-spacing:-4px;margin:6px 0;text-shadow:0 0 30px var(--accent)}
+.cond{font-size:19px}
+.meta{color:var(--soft);margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+.stats div{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;text-align:center}
+.stats b{display:block;font-size:18px;font-weight:600;color:#fff}
+.stats small{color:var(--soft)}
+section.sect{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:14px 16px;margin-bottom:18px}
+.hours{display:flex;gap:18px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.hours::-webkit-scrollbar{display:none}
+.h{flex:none;text-align:center;min-width:44px}
+.h i{display:block;font-style:normal;margin:6px 0}
+.h i .ic{display:block;width:26px;height:26px;margin:0 auto}
+.h small{color:var(--soft);display:block;white-space:nowrap}
+.h b{color:#fff}
+.d{display:grid;grid-template-columns:88px 26px 36px 32px 1fr 32px;align-items:center;gap:8px;padding:9px 0;border-top:1px solid rgba(0,246,255,.14)}
+.d:first-of-type{border-top:0}
+.d>span:first-child{color:var(--soft)}
+.d .lo{color:var(--soft);text-align:right}
+.d .hi{text-align:right;color:#fff}
+.d small{color:var(--accent2)}
+.bar{height:5px;border-radius:3px;background:rgba(0,246,255,.18);position:relative}
+.bar span{position:absolute;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));box-shadow:0 0 8px var(--accent)}
+.msg{text-align:center;padding:40px 0;color:var(--soft)}
+.ic{width:1.15em;height:1.15em;vertical-align:-.2em;stroke:var(--accent);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#loc .ic{width:22px;height:22px;vertical-align:middle}
+.d .ic{width:20px;height:20px}
+
+/* Fenêtres */
+.sheet{position:fixed;inset:0;z-index:10;background:rgba(3,4,10,.7);display:flex;align-items:center;justify-content:center;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.card{width:100%;max-width:440px;min-width:0;max-height:86vh;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;background:rgba(10,12,26,.97);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 0 40px rgba(0,246,255,.18)}
+.card h3{margin:0 0 12px;font-size:19px;color:#fff;text-shadow:0 0 10px var(--accent)}
+.card h3.sub{margin-top:22px;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);text-shadow:none}
+.card form{display:grid;gap:10px;margin-bottom:6px}
+.card .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.card .row button{flex:1 1 140px;min-width:0;white-space:normal;text-align:center}
+.card input,.card button{max-width:100%}
+#cf{display:flex;gap:8px}
+#cf input{flex:1;min-width:0}
+code{
+  display:block;word-break:break-all;background:rgba(0,0,0,.4);border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;margin:6px 0 10px;font-size:13px;user-select:all;-webkit-user-select:all;
+}
+.seedots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:8px 0 4px}
+.seedots small{color:var(--soft);text-align:center}
+.seedots .dots{display:flex;gap:8px;justify-content:center}
+.seedots .dots i{width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.gap{height:8px}
+#nf{max-width:100%}
+#nf input{min-height:44px;padding:9px 12px}
+button:disabled{opacity:.38;cursor:default;box-shadow:none;transform:none}
+
+/* ---------- Fond météo animé (page détail) ---------- */
+main{position:relative;z-index:1}
+#wxbg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+#wxbg i{position:absolute;display:block}
+.wx-sun{top:64px;right:-36px;width:190px;height:190px;border-radius:50%;border:2px solid rgba(255,214,90,.8);background:radial-gradient(circle,rgba(255,200,60,.14),transparent 70%);box-shadow:0 0 40px rgba(255,190,60,.45),inset 0 0 36px rgba(255,190,60,.25);animation:wxpulse 6s ease-in-out infinite}
+.wx-rays{top:14px;right:-86px;width:290px;height:290px;border-radius:50%;border:2px dashed rgba(255,214,90,.38);animation:wxspin 70s linear infinite}
+.wx-rays.r2{top:-26px;right:-126px;width:370px;height:370px;border-width:1px;border-color:rgba(255,214,90,.18);animation-duration:110s;animation-direction:reverse}
+.wx-moon{top:78px;right:34px;width:104px;height:104px;border-radius:50%;box-shadow:inset -24px 8px 0 0 rgba(210,236,255,.9);filter:drop-shadow(0 0 14px rgba(0,246,255,.55));animation:wxpulse 7s ease-in-out infinite}
+.wx-star{width:2px;height:2px;border-radius:50%;background:#eaf6ff;box-shadow:0 0 6px var(--accent);animation:wxtwinkle 4s ease-in-out infinite}
+.wx-cloud{left:0;animation:wxdrift 60s linear infinite}
+.wx-cloud svg{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 0 6px rgba(0,246,255,.55))}
+.wx-cloud path{fill:rgba(0,246,255,.035);stroke:rgba(0,246,255,.75);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.wx-drop{top:-90px;width:1.5px;height:64px;border-radius:1px;background:linear-gradient(to bottom,transparent,var(--accent));animation:wxfall .8s linear infinite}
+.wx-flake{top:-12px;border-radius:50%;background:#eaf6ff;box-shadow:0 0 8px var(--accent);animation:wxsnow 9s linear infinite}
+.wx-fog{left:-60%;width:220%;height:80px;border-radius:50%;background:linear-gradient(90deg,transparent,rgba(170,215,255,.13),rgba(0,246,255,.08),transparent);filter:blur(10px);animation:wxfog 18s ease-in-out infinite alternate}
+.wx-flash{inset:0;animation:wxflash 7s linear infinite}
+.wx-bolt{top:16%;right:18%;width:70px;opacity:0;animation:wxbolt 7s linear infinite}
+.wx-bolt path{fill:none;stroke:var(--accent2);stroke-width:2.5;stroke-linejoin:round;filter:drop-shadow(0 0 8px var(--accent2))}
+@keyframes wxspin{to{transform:rotate(360deg)}}
+@keyframes wxpulse{0%,100%{opacity:.85;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+@keyframes wxtwinkle{0%,100%{opacity:.15}50%{opacity:1}}
+@keyframes wxdrift{from{transform:translateX(-105%)}to{transform:translateX(100vw)}}
+@keyframes wxfall{to{transform:translateY(calc(100vh + 160px))}}
+@keyframes wxsnow{0%{transform:translate(0,0)}25%{transform:translate(18px,27vh)}50%{transform:translate(-6px,54vh)}75%{transform:translate(16px,81vh)}100%{transform:translate(0,calc(100vh + 30px))}}
+@keyframes wxfog{from{transform:translateX(-12%)}to{transform:translateX(12%)}}
+@keyframes wxflash{0%,88%,91%,93%,100%{background:transparent}89%,92%{background:rgba(190,150,255,.16)}}
+@keyframes wxbolt{0%,88%,91.5%,100%{opacity:0}88.5%,91%{opacity:1}}
+
+/* ---------- Minuteur & alarme : roulettes chromées ---------- */
+.tbox{border-color:rgba(243,207,110,.35);box-shadow:0 0 18px rgba(243,207,110,.14),inset 0 0 24px rgba(243,207,110,.04)}
+.tbox h2{color:#e9c96f}
+.tbox h2::after{background:linear-gradient(90deg,rgba(243,207,110,.5),transparent)}
+.drums{display:flex;justify-content:center;gap:10px;margin:4px 0 12px}
+.dcol{display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.dcol small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#cfd5de;font-weight:600}
+.drum{position:relative;width:min(84px,25vw);height:200px;border-radius:18px;padding:3px;
+  background:linear-gradient(160deg,#f6f7f9 0%,#8a929e 16%,#eef1f5 32%,#5a616c 50%,#dfe3e9 68%,#79818c 84%,#f3f5f8 100%);
+  box-shadow:0 8px 20px rgba(0,0,0,.6),0 0 16px rgba(243,207,110,.16)}
+.drum::before{content:"";position:absolute;left:3px;right:3px;top:50%;height:40px;transform:translateY(-50%);pointer-events:none;z-index:1;
+  border-top:1px solid rgba(247,222,140,.85);border-bottom:1px solid rgba(247,222,140,.85);
+  background:linear-gradient(90deg,transparent,rgba(243,207,110,.12),transparent);box-shadow:0 0 10px rgba(243,207,110,.35)}
+.drum::after{content:"";position:absolute;inset:3px;border-radius:15px;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,rgba(0,0,0,.75) 0%,rgba(0,0,0,0) 34%,rgba(255,255,255,.05) 50%,rgba(0,0,0,0) 66%,rgba(0,0,0,.75) 100%)}
+.dv{height:100%;overflow-y:scroll;scroll-snap-type:y mandatory;border-radius:15px;padding:80px 0;scrollbar-width:none;overscroll-behavior:contain;
+  background:linear-gradient(180deg,#05060b 0%,#191b24 25%,#2b2e39 50%,#191b24 75%,#05060b 100%);outline:none}
+.dv::-webkit-scrollbar{display:none}
+.dv:focus-visible{box-shadow:0 0 0 2px #f3cf6e}
+.di{height:40px;line-height:40px;scroll-snap-align:center;text-align:center;font-size:24px;font-weight:300;font-variant-numeric:tabular-nums;color:rgba(214,220,230,.42);user-select:none;-webkit-user-select:none}
+.di.on{font-size:30px;font-weight:600;color:#f3cf6e;background:linear-gradient(180deg,#fff8dc 0%,#f5d77f 38%,#b8862b 62%,#f8e6a6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 6px rgba(243,207,110,.5))}
+.drums.run .dv{overflow:hidden;pointer-events:none}
+.drums.run .drum{box-shadow:0 8px 20px rgba(0,0,0,.6),0 0 22px rgba(243,207,110,.4)}
+.tstat{color:var(--soft);text-align:center;margin:0 0 12px;font-size:14px;min-height:20px}
+.tctl{display:flex;gap:8px}
+.tctl button{flex:1;min-width:0}
+.tbox .pri{background:linear-gradient(180deg,#fdeeb5 0%,#e2b44c 48%,#a8761f 100%);border-color:#f7de8c;color:#1d1400;box-shadow:0 0 16px rgba(243,207,110,.35)}
+.tbox .danger{background:linear-gradient(180deg,#f4f6f9 0%,#aab2bd 50%,#6f7782 100%);border-color:#e6eaef;color:#15181d}
+.tbox button:hover{box-shadow:0 0 16px rgba(243,207,110,.45)}
+.mh{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin:16px 0 8px;font-weight:600}
+.hist{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:6px 14px;border-radius:999px;font-size:15px;font-variant-numeric:tabular-nums}
+.tbox .chip{border-color:rgba(214,220,230,.45)}
+.chip::before{content:"↻";color:var(--accent);margin-right:2px}
+.tbox .chip::before{color:#f3cf6e}
+.over{position:fixed;inset:0;z-index:20;background:rgba(3,4,10,.78);display:flex;align-items:center;justify-content:center;padding:20px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+/* Sonnerie */
+.rbox{width:100%;max-width:360px;text-align:center;background:rgba(10,12,26,.97);border:1px solid var(--accent2);border-radius:24px;padding:28px 20px;box-shadow:0 0 40px rgba(255,43,214,.35)}
+.rt{font-size:24px;font-weight:600;color:#fff;text-shadow:0 0 12px var(--accent2);margin:8px 0 4px}
+.rbox .pri{width:100%;margin-top:12px;font-size:18px}
+.toast{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:40;width:calc(100% - 28px);max-width:440px;background:rgba(10,12,26,.97);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:0 0 24px rgba(0,246,255,.25);display:flex;align-items:center;gap:10px;font-size:14px}
+.toast span{flex:1}
+.toast a{color:var(--accent);font-weight:600;white-space:nowrap}
+
+/* ---------- Deezer ---------- */
+.dz iframe{display:block;width:100%;height:340px;border:0;border-radius:14px;margin-bottom:12px;background:rgba(0,0,0,.3)}
+.dzb{background:linear-gradient(135deg,#a238ff,#ef5466);border-color:#a238ff;color:#fff;font-weight:600;box-shadow:0 0 16px rgba(162,56,255,.4)}
+.rowf{display:flex;gap:8px;margin-bottom:10px}
+.rowf input{flex:1;min-width:0}
+.dzr{display:flex;align-items:center;gap:12px;width:100%;justify-content:flex-start;text-align:left;margin-top:8px;padding:8px 12px}
+.dzr img{width:44px;height:44px;border-radius:8px;flex:none;object-fit:cover}
+.dzr span{flex:1;min-width:0;overflow:hidden}
+.dzr b,.dzr small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dzr small{color:var(--soft);font-weight:400}
+.tiny{font-size:13px}
+.dzhead{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.dzhead:empty{display:none}
+.dzhead img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none;background:var(--line)}
+.dzhead div{min-width:0}
+.dzhead b,.dzhead small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dzhead small{color:var(--soft)}
+</style>
+</head>
+<body>
+<div id="wxbg" hidden></div>
+<main>
+  <div id="home">
+    <header class="top">
+      <div class="who"><b id="who"></b></div>
+      <div class="clock"><b id="time"></b><small id="date"></small></div>
+      <button id="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </header>
+
+    <div class="panelcard wcard" id="wcard"><div class="wl"><div class="wcity">Météo</div><div class="wcond">Chargement…</div></div></div>
+
+    <div class="panelcard" id="notesBox">
+      <h2>Mes notes</h2>
+      <form id="notesForm"><input id="noteInput" maxlength="120" placeholder="Ajouter une note rapide…" autocomplete="off"><button class="pri" type="submit" aria-label="Ajouter">＋</button></form>
+      <div id="notesList"></div>
+    </div>
+
+    <div id="tw"></div>
+
+    <div class="panelcard tbox" id="tmBox"></div>
+    <div class="panelcard tbox" id="alBox"></div>
+    <div class="panelcard dz" id="dzBox"></div>
+  </div>
+
+  <div id="detail" hidden>
+    <div class="nav"><button id="back" type="button">‹ Accueil</button></div>
+    <form class="srch" id="f">
+      <input id="q" type="search" placeholder="Rechercher une ville" aria-label="Rechercher une ville" autocomplete="off">
+      <button type="button" id="loc" aria-label="Utiliser ma position"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg></button>
+    </form>
+    <div id="dbody"></div>
+  </div>
+</main>
+<div class="sheet" id="sheet" hidden></div>
+<div class="over" id="ring" hidden></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const R = n => Math.round(n);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const save = (k, v) => { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} };
+function load(k){
+  if (k in mem) return mem[k];
+  try { const v = localStorage.getItem(k); if (v === null) return null; return JSON.parse(v); }
+  catch(e){ return null; }
+}
+const del  = k => { delete mem[k]; try { localStorage.removeItem(k); } catch(e){} };
+/* Réserve en mémoire : la sauvegarde marche même si le localStorage est indisponible
+   (aperçu dans un iframe, Safari privé…) : au moins pendant la session ouverte. */
+const mem = {};
+const confirmOK = msg => { try { return window.confirm(msg); } catch(e){ return true; } };
+
+/* ---------- Retour de connexion Twitch (le jeton arrive dans l'adresse) ---------- */
+(function(){
+  const h = new URLSearchParams(location.hash.slice(1)), s = new URLSearchParams(location.search);
+  const err = h.get("error") || s.get("error");
+  if (err) { save("twErr", (h.get("error_description") || s.get("error_description") || err).replace(/\+/g, " ")); }
+  if (h.get("access_token")) {
+    const want = load("twState");
+    /* Si Safari a perdu la mémoire pendant la connexion, on garde quand même le jeton. */
+    if (!want || h.get("state") === want) { save("twToken", h.get("access_token")); del("twUser"); del("twErr"); }
+  }
+  if (!err && !h.get("access_token")) return;
+  del("twState");
+  history.replaceState(null, "", location.pathname);
+})();
+
+/* ---------- Fenêtre modale ---------- */
+let sheetDismissable = true;
+function modal(html, dismissable){
+  sheetDismissable = !!dismissable;
+  $("#sheet").innerHTML = '<div class="card">' + html + '</div>';
+  $("#sheet").hidden = false;
+}
+function closeModal(){ const m = $("#sheet"); m.hidden = true; m.innerHTML = ""; }
+
+/* Tout passe par la délégation d'événements : un seul point d'écoute,
+   fiable même quand le contenu de la fenêtre est recréé. */
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-act]");
+  if (!t) return;
+  const act = t.dataset.act;
+  if (act === "close") return closeModal();
+  if (act === "backdrop") { if (sheetDismissable) closeModal(); return; }
+  if (act === "tdis")   { del("twToken"); del("twUser"); closeModal(); loadTwitch(); return; }
+  if (act === "tcid")   { del("twClient"); del("twToken"); del("twUser"); closeModal(); loadTwitch(); return; }
+  if (act === "twnew")  { closeModal(); if (load("twClient")) twConnectBox("Connecte ton compte pour voir qui est en live parmis tes abonnements."); else twSetup(); return; }
+  if (act === "wipe")   { if (confirmOK("Effacer prénom, notes, ville, connexion Twitch, minuteur, alarme et playlist ?")) { try { if (alarmAudio) alarmAudio.pause(); } catch(e){} ["name","notes","place","twToken","twUser","twClient","twState","twErr","theme","tmSet","tmRun","tmHist","alSet","alRun","alHist","dzPl"].forEach(del); location.reload(); } return; }
+  if (act === "delNote"){ const notes = load("notes") || []; notes.splice(+t.dataset.i, 1); save("notes", notes); renderNotes(); return; }
+});
+$("#sheet").addEventListener("click", e => { if (e.target === $("#sheet") && sheetDismissable) closeModal(); });
+document.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.id === "nf") { const v = $("#ni").value.trim(); if (v) { save("name", v); setName(); closeModal(); } return; }
+  if (e.target.id === "sf") { const v = $("#si").value.trim(); if (v) { save("name", v); setName(); } return; }
+  if (e.target.id === "cityForm") { const v = $("#cityInput").value.trim(); if (v) { closeModal(); searchAndShow(v); } return; }
+  if (e.target.id === "cf") { twSaveClient($("#ci").value); return; }
+  if (e.target.id === "dzf") { dzSubmit($("#dzi").value); return; }
+  if (e.target.id === "notesForm") { const v = $("#noteInput").value.trim(); if (!v) return; const notes = load("notes") || []; notes.push(v); save("notes", notes); $("#noteInput").value = ""; renderNotes(); return; }
+});
+
+function askName(){
+  modal('<h3>Bienvenue sur Néon</h3><p class="note">On commence : comment dois-je t’appeler ?</p><form id="nf"><input id="ni" maxlength="24" placeholder="Ton prénom" autocomplete="given-name"><button class="pri" type="submit">Continuer</button></form>', false);
+}
+
+/* ---------- Réglages ---------- */
+function openSettings(){
+  const tok = load("twToken"), cid = load("twClient"), u = load("twUser");
+  modal('<h3>Réglages</h3>' +
+    '<h3 class="sub">Prénom</h3><form id="sf"><input id="si" maxlength="24" placeholder="Prénom" aria-label="Prénom"><button class="pri" type="submit">Enregistrer</button></form>' +
+    '<h3 class="sub">Météo</h3><form id="cityForm"><p class="note">Rien à connecter : la météo marche toute seule, sans lien ni code. Elle utilise ta position (accepte la demande de localisation) ou la ville que tu écris ici.</p><p class="note">Ville actuelle : ' + esc((load("place") || {}).name || "aucune") + '</p><input id="cityInput" placeholder="Changer de ville…" autocomplete="off"><button class="pri" type="submit">Changer</button></form>' +
+    '<h3 class="sub">Twitch</h3><p class="note">Statut : ' + (tok ? "compte connecté" + (u ? " : " + esc(u.name) : "") : "compte non connecté") + '</p>' +
+    '<p class="note">URL de redirection à mettre dans ton application sur dev.twitch.tv :</p><code>' + esc(redirectURL()) + '</code> <button type="button" id="twcp" data-act="twcopy">Copier</button>' +
+    '<div class="row"><button class="tw" type="button" data-act="twnew">' + (cid ? "Refaire le lien" : "Connecter Twitch") + '</button></div>' +
+    (cid ? '<p class="note">Client ID enregistré : <code>' + esc(cid) + '</code></p>' : '') +
+    (cid || tok ? '<div class="row"><button class="danger" type="button" data-act="tcid">Changer le Client ID</button>' + (tok ? '<button class="danger" type="button" data-act="tdis">Déconnecter</button>' : '') + '</div>' : '') +
+    '<div class="row"><button class="danger" type="button" data-act="wipe">Effacer toutes mes données</button></div>' +
+    '<div class="gap"></div><button class="pri" type="button" data-act="close" style="width:100%">Fermer</button>', true);
+}
+
+/* ---------- En-tête : salutation + heure ---------- */
+function setName(){ updateGreeting(); }
+function greeting(){
+  const h = new Date().getHours();
+  return h >= 19 ? "Bonsoir" : "Bonjour"; // de minuit à 19 h : Bonjour, de 19 h à minuit : Bonsoir
+}
+function updateGreeting(){
+  const n = load("name");
+  $("#who").textContent = load("name") === null ? "" : greeting() + (n ? ", " + n : "");
+}
+function tick(){
+  const d = new Date();
+  $("#time").textContent = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  $("#date").textContent = d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  updateGreeting();
+}
+
+/* ---------- Notes rapides ---------- */
+function renderNotes(){
+  const notes = load("notes") || [];
+  $("#notesList").innerHTML = notes.length
+    ? notes.map((n, i) =>
+        '<div class="ni"><span class="ntext" data-act="toggleNote" data-i="' + i + '">' + esc(n) + '</span>' +
+        '<button type="button" class="ndel" data-act="delNote" data-i="' + i + '" aria-label="Supprimer la note ' + (i + 1) + '">✕</button></div>').join("")
+    : '<p class="nempty">Aucune note pour le moment.</p>';
+}
+
+/* ---------- Météo (Open-Meteo, aucune clé API nécessaire, HTTPS) ---------- */
+const WMO = {
+  0:"Ciel dégagé",1:"Plutôt dégagé",2:"Nuageux par moments",3:"Couvert",
+  45:"Brouillard",48:"Brouillard givrant",
+  51:"Bruine légère",53:"Bruine",55:"Bruine dense",56:"Bruine verglaçante",57:"Bruine verglaçante",
+  61:"Pluie faible",63:"Pluie",65:"Forte pluie",66:"Pluie verglaçante",67:"Pluie verglaçante",
+  71:"Neige faible",73:"Neige",75:"Forte neige",77:"Grains de neige",
+  80:"Averses",81:"Averses",82:"Fortes averses",85:"Averses de neige",86:"Fortes averses de neige",
+  95:"Orage",96:"Orage et grêle",99:"Orage et forte grêle"
+};
+/* Icônes météo : traits fins (SVG), à la place des emojis */
+const CL = '<path d="M7 14h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 5.6 4.2 4.2 0 0 0 7 14z"/>';
+const WXI = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  night: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  partly: '<circle cx="8" cy="8" r="2.5"/><path d="M8 2.5v1M2.5 8h1M4.1 4.1l.7.7M11.9 4.1l-.7.7"/><path d="M9.5 20h8a3.3 3.3 0 0 0 .3-6.6 4.8 4.8 0 0 0-9.2 1.2A2.7 2.7 0 0 0 9.5 20z"/>',
+  partlyn: '<g transform="translate(0 -1) scale(.55)"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></g><path d="M9.5 20h8a3.3 3.3 0 0 0 .3-6.6 4.8 4.8 0 0 0-9.2 1.2A2.7 2.7 0 0 0 9.5 20z"/>',
+  cloud: '<path d="M7 18h10a4 4 0 0 0 .6-7.95A6 6 0 0 0 6.1 9.6 4.2 4.2 0 0 0 7 18z"/>',
+  fog: '<path d="M3 8h18M5 12h14M3 16h18M7 20h10"/>',
+  drizzle: CL + '<path d="M8 17.5v1M12 17.5v1M16 17.5v1"/>',
+  rain: CL + '<path d="M8 17l-1 3M12 17l-1 3M16 17l-1 3"/>',
+  snow: CL + '<path d="M8 18h.01M12 18h.01M16 18h.01M10 21h.01M14 21h.01" stroke-width="2.4"/>',
+  storm: CL + '<path d="M12.5 14l-2.5 4h3.5l-2 4"/>'
+};
+const wxIcon = k => '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + (WXI[k] || WXI.cloud) + '</svg>';
+const info = (c, day = 1) => [WMO[c] || "—", wxIcon(wxKind(c, day))];
+
+let current = null; // { p, w }
+
+/* Récupère un JSON en essayant chaque adresse l'une après l'autre (requête simple, sans en-têtes
+   ajoutés : Safari sur iPhone refuse sinon certaines demandes). Délai max par essai. */
+async function getJSON(urls, ms){
+  const errs = [];
+  for (const u of urls){
+    const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    const timer = ctl ? setTimeout(() => ctl.abort(), ms || 8000) : 0;
+    try {
+      const r = await fetch(u, ctl ? { signal: ctl.signal } : undefined);
+      if (!r.ok) { errs.push("erreur " + r.status); continue; }
+      const txt = await r.text();
+      let j; try { j = JSON.parse(txt); } catch(e){ errs.push("réponse illisible"); continue; }
+      if (j && j.error) { errs.push(String(j.reason || j.error)); continue; }
+      return j;
+    } catch(e){ errs.push((e && e.name === "AbortError") ? "délai dépassé" : String(e && e.message || e)); }
+    finally { clearTimeout(timer); }
+  }
+  throw new Error(errs.join(", ") || "aucune réponse");
+}
+/* Le relais du serveur n'existe que dans la version Lovable ; sur GitHub on va directement aux services. */
+const onLovable = /lovable\.app$|lovableproject\.com$|^localhost$/.test(location.hostname);
+const viaApp = (kind, qs) => onLovable ? ["/api/weather?kind=" + kind + "&" + qs] : [];
+
+/* Service de secours : wttr.in (gratuit, sans clé). On convertit ses données au format d'Open-Meteo. */
+const WWO = {113:0,116:2,119:3,122:3,143:45,248:45,260:48,176:80,179:85,182:66,185:56,200:95,227:73,230:75,263:51,266:53,281:56,284:57,293:61,296:61,299:63,302:63,305:65,308:65,311:66,314:67,317:66,320:71,323:71,326:71,329:73,332:73,335:75,338:75,350:77,353:80,356:81,359:82,362:85,365:86,368:85,371:86,374:77,377:77,386:95,389:95,392:96,395:99};
+const wmo = c => (+c in WWO) ? WWO[+c] : 3;
+const pad = n => String(n).padStart(2, "0");
+const minutesOf = t => { const m = /(\d+):(\d+)\s*(AM|PM)/i.exec(t || ""); if (!m) return null; let h = +m[1] % 12; if (/PM/i.test(m[3])) h += 12; return h * 60 + +m[2]; };
+function fromWttr(j){
+  const cc = j.current_condition[0], now = new Date();
+  const H = { time: [], temperature_2m: [], weather_code: [], is_day: [] };
+  const D = { time: [], weather_code: [], temperature_2m_max: [], temperature_2m_min: [], precipitation_probability_max: [] };
+  j.weather.forEach(day => {
+    const a = day.astronomy && day.astronomy[0] || {}, rise = minutesOf(a.sunrise) ?? 480, set = minutesOf(a.sunset) ?? 1080;
+    day.hourly.forEach(h => {
+      const base = Math.floor(+h.time / 100);
+      for (let k = 0; k < 3; k++){
+        const hr = base + k;
+        H.time.push(day.date + "T" + pad(hr) + ":00");
+        H.temperature_2m.push(+h.tempC); H.weather_code.push(wmo(h.weatherCode));
+        H.is_day.push(hr * 60 >= rise && hr * 60 < set ? 1 : 0);
+      }
+    });
+    const noon = day.hourly[4] || day.hourly[0];
+    D.time.push(day.date); D.weather_code.push(wmo(noon.weatherCode));
+    D.temperature_2m_max.push(+day.maxtempC); D.temperature_2m_min.push(+day.mintempC);
+    D.precipitation_probability_max.push(Math.max(...day.hourly.map(h => +h.chanceofrain || 0)));
+  });
+  const nowStr = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate()) + "T" + pad(now.getHours()) + ":" + pad(now.getMinutes());
+  const hi = H.time.findIndex(t => t >= nowStr.slice(0, 13) + ":00");
+  return {
+    current: { time: nowStr, temperature_2m: +cc.temp_C, apparent_temperature: +cc.FeelsLikeC, relative_humidity_2m: +cc.humidity,
+               wind_speed_10m: +cc.windspeedKmph, weather_code: wmo(cc.weatherCode), is_day: hi >= 0 ? H.is_day[hi] : 1 },
+    hourly: H, daily: D
+  };
+}
+
+async function fetchWeather(p){
+  const qs = "latitude=" + p.lat + "&longitude=" + p.lon +
+    "&current=temperature_2m,apparent_temperature,relative_humidity_2m,is_day,weather_code,wind_speed_10m" +
+    "&hourly=temperature_2m,weather_code,is_day" +
+    "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max" +
+    "&timezone=auto&forecast_days=7&wind_speed_unit=kmh";
+  const errs = [];
+  try { return await getJSON(viaApp("forecast", qs).concat("https://api.open-meteo.com/v1/forecast?" + qs)); }
+  catch(e){ errs.push("Open-Meteo : " + e.message); }
+  try { return fromWttr(await getJSON(["https://wttr.in/" + (+p.lat).toFixed(3) + "," + (+p.lon).toFixed(3) + "?format=j1"], 12000)); }
+  catch(e){ errs.push("wttr.in : " + e.message); }
+  throw new Error(errs.join(" · "));
+}
+
+function render(p, w){
+  current = { p, w };
+  const c = w.current, D = w.daily, [label, icon] = info(c.weather_code, c.is_day);
+  try { setWx(c.weather_code, c.is_day); } catch(e){}
+
+  $("#wcard").innerHTML = '<div class="wl"><div class="wcity">' + esc(p.name) + '</div><div class="wcond">' + icon + " " + label +
+    '</div><div class="wmm">Max ' + R(D.temperature_2m_max[0]) + '° · Min ' + R(D.temperature_2m_min[0]) + '°</div></div>' +
+    '<div class="wt">' + R(c.temperature_2m) + '°</div><span class="chev">›</span>';
+
+  const start = Math.max(0, w.hourly.time.findIndex(t => t >= c.time.slice(0, 13) + ":00"));
+  const hours = w.hourly.time.slice(start, start + 24).map((t, i) => {
+    const j = start + i;
+    return '<div class="h"><small>' + (i ? t.slice(11, 13) + " h" : "Maint.") + '</small><i>' +
+      info(w.hourly.weather_code[j], w.hourly.is_day[j])[1] + '</i><b>' + R(w.hourly.temperature_2m[j]) + '°</b></div>';
+  }).join("");
+
+  const gmin = Math.min(...D.temperature_2m_min), gmax = Math.max(...D.temperature_2m_max), span = (gmax - gmin) || 1;
+  const days = D.time.map((d, i) => {
+    const name = i ? new Date(d + "T12:00").toLocaleDateString("fr-FR", { weekday: "long" }) : "Aujourd’hui";
+    const l = (D.temperature_2m_min[i] - gmin) / span * 100;
+    const wd = Math.max(6, (D.temperature_2m_max[i] - D.temperature_2m_min[i]) / span * 100);
+    const rain = D.precipitation_probability_max[i];
+    return '<div class="d"><span>' + name + '</span><span title="' + info(D.weather_code[i])[0] + '">' + info(D.weather_code[i])[1] +
+      '</span><small>' + (rain >= 20 ? rain + "%" : "") + '</small><span class="lo">' + R(D.temperature_2m_min[i]) +
+      '°</span><div class="bar"><span style="left:' + l + '%;width:' + wd + '%"></span></div><span class="hi">' + R(D.temperature_2m_max[i]) + '°</span></div>';
+  }).join("");
+
+  $("#dbody").innerHTML =
+    '<div class="now"><div class="city">' + esc(p.name) + '</div><div class="temp">' + R(c.temperature_2m) + '°</div>' +
+    '<div class="cond">' + icon + " " + label + '</div>' +
+    '<div class="meta">Max ' + R(D.temperature_2m_max[0]) + '° · Min ' + R(D.temperature_2m_min[0]) + '°</div></div>' +
+    '<div class="stats"><div><b>' + R(c.apparent_temperature) + '°</b><small>Ressenti</small></div>' +
+    '<div><b>' + R(c.wind_speed_10m) + ' km/h</b><small>Vent</small></div>' +
+    '<div><b>' + c.relative_humidity_2m + ' %</b><small>Humidité</small></div></div>' +
+    '<section class="sect"><h2>Prochaines 24 heures</h2><div class="hours">' + hours + '</div></section>' +
+    '<section class="sect"><h2>' + D.time.length + ' jours</h2>' + days + '</section>';
+}
+
+function weatherError(e){
+  $("#wcard").innerHTML = '<div class="wl"><div class="wcity">Météo indisponible</div><div class="wmm">Touche ici pour réessayer, ou change de ville dans les réglages</div>' +
+    (e && e.message ? '<div class="wmm" style="font-size:12px;opacity:.7">Détail : ' + esc(e.message) + ' — page ouverte depuis : ' + esc(location.protocol === "file:" ? "un fichier sur le téléphone" : location.host || location.protocol) + '</div>' : '') + '</div>';
+  $("#dbody").innerHTML = '<p class="msg">Météo indisponible.' + (e && e.message ? '<br><small>Détail : ' + esc(e.message) + '</small>' : '') + '</p>';
+  current = null;
+}
+
+async function show(p){
+  save("place", p);
+  $("#wcard").innerHTML = '<div class="wl"><div class="wcity">' + esc(p.name) + '</div><div class="wcond">Chargement…</div></div>';
+  let w;
+  try { w = await fetchWeather(p); } catch(e){ return weatherError(e); }
+  try { render(p, w); } catch(e){ weatherError(new Error("affichage : " + e.message)); }
+}
+
+async function searchAndShow(name){
+  const safe = (name || "").trim();
+  if (!safe) return;
+  try {
+    const qs = "count=1&language=fr&name=" + encodeURIComponent(safe);
+    let g;
+    try { g = (await getJSON(viaApp("search", qs).concat("https://geocoding-api.open-meteo.com/v1/search?" + qs))).results; }
+    catch(e1){
+      let a;
+      try { a = (await getJSON(["https://wttr.in/" + encodeURIComponent(safe) + "?format=j1"], 12000)).nearest_area[0]; }
+      catch(e2){ throw new Error("Open-Meteo : " + e1.message + " · wttr.in : " + e2.message); }
+      g = [{ name: safe.charAt(0).toUpperCase() + safe.slice(1), country: a.country && a.country[0] && a.country[0].value, latitude: +a.latitude, longitude: +a.longitude }];
+    }
+    if (!g) {
+      const m = 'Aucune ville trouvée pour « ' + esc(safe) + ' ».';
+      $("#dbody").innerHTML = '<p class="msg">' + m + '</p>';
+      if (!$("#home").hidden) { $("#wcard").innerHTML = '<div class="wl"><div class="wcity">Ville introuvable</div><div class="wmm">' + m + ' Réessaie dans les réglages</div></div>'; current = null; }
+      return;
+    }
+    show({ name: g[0].name + (g[0].country ? ", " + g[0].country : ""), lat: g[0].latitude, lon: g[0].longitude });
+  } catch(e){ weatherError(e); }
+}
+
+function fallback(){ show(load("place") || { name: "Paris, France", lat: 48.8566, lon: 2.3522 }); }
+function locate(){
+  if (!navigator.geolocation) return fallback();
+  navigator.geolocation.getCurrentPosition(async pos => {
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    let name = "Ma position";
+    try {
+      const ctl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      const timer = ctl ? setTimeout(() => ctl.abort(), 4000) : 0;
+      const r = await fetch("https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=fr&latitude=" + lat + "&longitude=" + lon, ctl ? { signal: ctl.signal } : {});
+      clearTimeout(timer);
+      const j = await r.json(); name = j.city || j.locality || name;
+    } catch(e){}
+    show({ name, lat, lon });
+  }, fallback, { timeout: 10000, maximumAge: 600000 });
+}
+
+/* ---------- Twitch ---------- */
+/* Adresse de retour toujours identique : le dossier de l'app, avec un "/" à la fin
+   (on enlève index.html, Menu_v6.html, etc.). C'est exactement celle à mettre sur dev.twitch.tv. */
+const redirectURL = () => location.origin + location.pathname.replace(/[^/]*\.html?$/i, "").replace(/\/?$/, "/");
+const onFile = location.protocol === "file:";
+function twCopy(){
+  const u = redirectURL();
+  const ok = () => { const b = $("#twcp"); if (b) b.textContent = "Copié ✓"; };
+  if (navigator.clipboard) navigator.clipboard.writeText(u).then(ok, () => prompt("Copie cette adresse :", u));
+  else prompt("Copie cette adresse :", u);
+}
+const twBox = inner => { $("#tw").innerHTML = '<div class="panelcard"><h2>Twitch · En live</h2>' + inner + '</div>'; };
+
+/* Nettoie le Client ID collé : espaces, retours à la ligne, caractères invisibles,
+   guillemets, majuscule ajoutée par le clavier de l'iPhone, "Client ID :" copié avec. */
+function cleanClient(v){
+  return String(v || "").replace(/^\s*(id\s*client|client\s*id)\s*:?/i, "")
+    .replace(/[\s\u200B-\u200D\uFEFF"'`«»“”‘’]/g, "").toLowerCase();
+}
+/* Demande à Twitch si ce Client ID existe. Réponses : "ok", "bad" (Twitch dit "invalid client"), "unknown" (pas de réseau…). */
+async function twCheckClient(id){
+  try {
+    const r = await fetch("https://id.twitch.tv/oauth2/device", { method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "client_id=" + encodeURIComponent(id) + "&scopes=user%3Aread%3Afollows" });
+    if (r.ok) return "ok";
+    const j = await r.json().catch(() => ({}));
+    return /invalid client/i.test(j.message || "") ? "bad" : "unknown";
+  } catch(e){ return "unknown"; }
+}
+function twBadClient(id){
+  twBox('<p class="note">Twitch ne reconnaît pas ce Client ID : <code>' + esc(id) + '</code></p>' +
+    '<p class="note">C’est ce qui provoque le message <b>« invalid client »</b>. Pour le retrouver :</p>' +
+    '<p class="note">1. Va sur <b>dev.twitch.tv/console/apps</b> et appuie sur <b>Gérer</b> à côté de ton application.<br>' +
+    '2. En bas de la page, copie la case <b>ID client</b> (Client ID).<br>' +
+    'Ne prends pas le <b>Secret client</b> et n’appuie pas sur « Nouveau secret ».<br>' +
+    '3. Colle-le ci-dessous.</p>' +
+    '<form id="cf"><input id="ci" placeholder="Client ID" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="tw" type="submit">OK</button></form>' +
+    '<p class="note"><button type="button" data-act="twforce">Je suis sûr de mon Client ID, essayer quand même</button></p>');
+}
+async function twSaveClient(raw){
+  const id = cleanClient(raw);
+  if (!id) return;
+  if (!/^[a-z0-9]{20,40}$/.test(id)) { twBadClient(id); return; }
+  twBox('<p class="note">Vérification du Client ID auprès de Twitch…</p>');
+  if (await twCheckClient(id) === "bad") { save("twClient", id); twBadClient(id); return; }
+  save("twClient", id); del("twErr"); loadTwitch();
+}
+async function twLogin(force){
+  if (onFile) { twBox('<p class="note">La connexion Twitch ne marche pas quand l’app est ouverte depuis un fichier du téléphone. Ouvre-la depuis ton adresse GitHub (https://…github.io/…/).</p>'); return; }
+  const id = cleanClient(load("twClient"));
+  if (!id) return twSetup();
+  if (id !== load("twClient")) save("twClient", id);
+  if (!force) {
+    twBox('<p class="note">Vérification du Client ID auprès de Twitch…</p>');
+    if (await twCheckClient(id) === "bad") { twBadClient(id); return; }
+  }
+  const st = Math.random().toString(36).slice(2) + Date.now().toString(36);
+  save("twState", st);
+  location.href = "https://id.twitch.tv/oauth2/authorize?client_id=" + encodeURIComponent(load("twClient")) +
+    "&redirect_uri=" + encodeURIComponent(redirectURL()) + "&response_type=token&scope=user%3Aread%3Afollows&force_verify=true&state=" + st;
+}
+function twConnectBox(msg){
+  const e = load("twErr");
+  twBox((e ? '<p class="note">Twitch a répondu : <b>' + esc(e) + '</b>. Vérifie que l’adresse ci-dessous est copiée à l’identique dans <b>OAuth Redirect URLs</b> sur dev.twitch.tv.</p>' : '') +
+    '<p class="note">' + msg + '</p><button class="tw" type="button" data-act="twlogin">Connecter Twitch</button>' +
+    '<p class="note">Client ID utilisé : <code>' + esc(load("twClient") || "") + '</code> <button type="button" data-act="tcid">Changer</button></p>' +
+    '<p class="note">Adresse de redirection : <code>' + esc(redirectURL()) + '</code> <button type="button" id="twcp" data-act="twcopy">Copier</button></p>');
+}
+function twSetup(){
+  twBox('<p class="note">Crée (ou ouvre) ton application sur <b>dev.twitch.tv/console</b>, et mets-le comme <b>OAuth Redirect URL</b> :</p>' +
+    '<code>' + esc(redirectURL()) + '</code> <button type="button" id="twcp" data-act="twcopy">Copier</button>' +
+    '<p class="note">Appuie ensuite sur <b>Gérer</b> à côté de ton application, copie la case <b>ID client</b> (pas le Secret client) et colle-la ici :</p>' +
+    '<form id="cf"><input id="ci" placeholder="Client ID" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="tw" type="submit">OK</button></form>');
+}
+async function twApi(path){
+  const r = await fetch("https://api.twitch.tv/helix/" + path, { headers: { Authorization: "Bearer " + load("twToken"), "Client-Id": load("twClient") } });
+  if (!r.ok) throw new Error(String(r.status));
+  return r.json();
+}
+function twList(list){
+  if (!list.length) { twBox('<p class="note">Aucune chaîne suivie n’est en live pour le moment.</p>'); return; }
+  twBox(list.map(s =>
+    '<a class="st" data-tw="' + esc(s.user_login) + '" href="https://www.twitch.tv/' + encodeURIComponent(s.user_login) + '" target="_blank" rel="noopener" title="' + esc(s.title) + '">' +
+    '<img src="' + esc(s.thumbnail_url.replace("{width}", "160").replace("{height}", "90")) + '" alt="" loading="lazy">' +
+    '<div class="si"><b>' + esc(s.user_name) + '</b><small>' + esc(s.game_name || "") + '</small></div>' +
+    '<span class="vw">● ' + s.viewer_count.toLocaleString("fr-FR") + '</span></a>').join(""));
+}
+async function loadTwitch(){
+  if (!load("twClient")) return twSetup();
+  if (!load("twToken")) return twConnectBox("Connecte ton compte pour voir qui est en live parmis tes abonnements.");
+  try {
+    let u = load("twUser");
+    if (!u) { const r = await twApi("users"); u = { id: r.data[0].id, name: r.data[0].display_name }; save("twUser", u); }
+    twList((await twApi("streams/followed?first=5&user_id=" + u.id)).data);
+  } catch(e){
+    if (e.message === "401") { del("twToken"); del("twUser"); twConnectBox("Ta session Twitch a expiré. Reconnecte-toi."); }
+    else if (!$("#tw .st")) twBox('<p class="note">Impossible de charger Twitch. Vérifie ta connexion, ou réinitialise les liens dans les réglages.</p>');
+  }
+}
+
+/* ---------- Ouvrir les apps (Twitch, Deezer) au lieu du site ---------- */
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(navigator.userAgent);
+function toast(html, ms){
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+  t.innerHTML = html; t.hidden = false;
+  clearTimeout(toast.tm); toast.tm = setTimeout(() => { t.hidden = true; }, ms || 6000);
+}
+/* Ouvre l'app ; si rien ne s'est passé au bout de 2,5 s, propose le site (sans quitter l'app d'office). */
+function openApp(appUrl, web, name){
+  let gone = false;
+  const mark = () => { if (document.hidden) gone = true; };
+  document.addEventListener("visibilitychange", mark);
+  window.addEventListener("pagehide", () => { gone = true; }, { once: true });
+  location.href = appUrl;
+  setTimeout(() => {
+    document.removeEventListener("visibilitychange", mark);
+    if (!gone && !document.hidden) toast('<span>L’app ' + name + ' ne s’est pas ouverte ?</span><a href="' + esc(web) + '" target="_blank" rel="noopener">Ouvrir le site</a>');
+  }, 2500);
+}
+function openTwitch(login){
+  const web = "https://www.twitch.tv/" + encodeURIComponent(login);
+  if (isAndroid) location.href = "intent://www.twitch.tv/" + encodeURIComponent(login) + "#Intent;scheme=https;package=tv.twitch.android.app;S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
+  else if (isIOS) openApp("twitch://stream/" + encodeURIComponent(login), web, "Twitch");
+  else window.open(web, "_blank", "noopener");
+}
+
+/* ---------- Fond animé de la météo ---------- */
+function wxKind(c, day){
+  if (c >= 95) return "storm";
+  if ((c >= 71 && c <= 77) || c === 85 || c === 86) return "snow";
+  if (c >= 51) return c <= 57 ? "drizzle" : "rain";
+  if (c === 45 || c === 48) return "fog";
+  if (c === 3) return "cloud";
+  if (c === 2) return day ? "partly" : "partlyn";
+  return day ? "sun" : "night";
+}
+const rnd = (a, b) => a + Math.random() * (b - a);
+const many = (n, f) => Array.from({ length: n }, f).join("");
+const CLOUD = '<svg viewBox="0 0 120 64"><path d="M26 56h68a17 17 0 0 0 1-34 27 27 0 0 0-50-6 19 19 0 0 0-26 15 12 12 0 0 0 7 25z"/></svg>';
+function setWx(c, day){
+  const k = wxKind(c, day), el = $("#wxbg");
+  if (el.dataset.k === k) return;
+  el.dataset.k = k;
+  const sun = '<i class="wx-rays r2"></i><i class="wx-rays"></i><i class="wx-sun"></i>';
+  const night = '<i class="wx-moon"></i>' + many(30, () => '<i class="wx-star" style="left:' + rnd(0, 100) + '%;top:' + rnd(0, 65) + '%;animation-delay:-' + rnd(0, 5) + 's;animation-duration:' + rnd(2.5, 5.5) + 's"></i>');
+  const clouds = (n, o, maxTop) => many(n, () => { const d = rnd(45, 95); return '<i class="wx-cloud" style="top:' + rnd(0, maxTop) + '%;width:' + R(rnd(130, 290)) + 'px;opacity:' + (o * rnd(.55, 1)).toFixed(2) + ';animation-duration:' + d + 's;animation-delay:-' + rnd(0, d) + 's">' + CLOUD + '</i>'; });
+  const drops = n => many(n, () => '<i class="wx-drop" style="left:' + rnd(-2, 102) + '%;animation-duration:' + rnd(.55, 1).toFixed(2) + 's;animation-delay:-' + rnd(0, 1).toFixed(2) + 's;opacity:' + rnd(.3, .9).toFixed(2) + '"></i>');
+  const flakes = n => many(n, () => { const s = rnd(2, 6), d = rnd(7, 15); return '<i class="wx-flake" style="left:' + rnd(0, 100) + '%;width:' + s + 'px;height:' + s + 'px;animation-duration:' + d + 's;animation-delay:-' + rnd(0, d) + 's;opacity:' + rnd(.4, 1).toFixed(2) + '"></i>'; });
+  const fog = many(6, (_, i) => '<i class="wx-fog" style="top:' + (8 + i * 15) + '%;animation-duration:' + rnd(14, 26) + 's;animation-delay:-' + rnd(0, 20) + 's"></i>');
+  const bolt = '<i class="wx-flash"></i><i class="wx-bolt"><svg viewBox="0 0 40 90"><path d="M24 2 8 44h14L12 88 34 34H20z"/></svg></i>';
+  el.innerHTML = {
+    sun: sun, night: night,
+    partly: sun + clouds(3, .8, 55), partlyn: night + clouds(3, .7, 55),
+    cloud: clouds(7, 1, 75), fog: clouds(2, .5, 30) + fog,
+    drizzle: clouds(4, .6, 25) + drops(32), rain: clouds(4, .6, 25) + drops(70),
+    snow: clouds(3, .5, 25) + flakes(50), storm: clouds(5, .7, 25) + drops(80) + bolt
+  }[k];
+}
+
+/* ---------- Roulettes (minuteur & alarme) ---------- */
+const UNITS = { h: { max: 24, lbl: "Heures" }, m: { max: 60, lbl: "Minutes" }, s: { max: 60, lbl: "Secondes" } };
+const KIND = { tm: { box: "#tmBox", units: ["h", "m", "s"] }, al: { box: "#alBox", units: ["h", "m"] } };
+const IH = 40, REP = 7; // hauteur d'un chiffre · nombre de tours dans chaque roulette (pour tourner sans fin)
+const split = sec => ({ h: Math.floor(sec / 3600), m: Math.floor(sec % 3600 / 60), s: sec % 60 });
+const fmtDur = sec => { const p = split(sec); return [p.h ? p.h + " h" : "", p.m ? p.m + " min" : "", p.s ? p.s + " s" : ""].filter(Boolean).join(" ") || "0 s"; };
+const hhmm = (h, m) => pad(h) + ":" + pad(m);
+const S = {
+  tm: { set: load("tmSet") || { h: 0, m: 5, s: 0 }, run: load("tmRun"), hist: load("tmHist") || [] },
+  al: { set: load("alSet") || { h: 7, m: 0 }, run: load("alRun"), hist: load("alHist") || [] }
+};
+function drumsHTML(k, run){
+  return '<div class="drums' + (run ? " run" : "") + '">' + KIND[k].units.map(u => {
+    const max = UNITS[u].max; let items = "";
+    for (let i = 0; i < max * REP; i++) items += '<div class="di">' + pad(i % max) + '</div>';
+    return '<div class="dcol"><div class="drum"><div class="dv" data-k="' + k + '" data-u="' + u + '" role="spinbutton" tabindex="0" aria-label="' + UNITS[u].lbl +
+      '" aria-valuemin="0" aria-valuemax="' + (max - 1) + '">' + items + '</div></div><small>' + UNITS[u].lbl + '</small></div>';
+  }).join("") + '</div>';
+}
+const drumIdx = el => Math.round(el.scrollTop / IH);
+const drumMax = el => UNITS[el.dataset.u].max;
+/* Met en or le chiffre au centre de la roulette. */
+function drumMark(el){
+  const i = drumIdx(el);
+  if (el._on === i) return;
+  if (el._on != null && el.children[el._on]) el.children[el._on].classList.remove("on");
+  if (el.children[i]) el.children[i].classList.add("on");
+  el._on = i; el.setAttribute("aria-valuenow", i % drumMax(el));
+}
+/* Place la roulette sur une valeur : d'un coup (au milieu des tours) ou en tournant jusqu'au chiffre le plus proche. */
+function drumSet(el, v, smooth){
+  const max = drumMax(el);
+  let i = Math.floor(REP / 2) * max + v;
+  if (smooth) { const c = drumIdx(el); let d = ((v - c % max) % max + max) % max; if (d > max / 2) d -= max; i = c + d; }
+  if (smooth) el.scrollTo({ top: i * IH, behavior: "smooth" }); else el.scrollTop = i * IH;
+  drumMark(el);
+}
+/* Quand la roulette s'arrête : on recentre (invisible) et on retient la valeur choisie. */
+function drumSettle(el){
+  const max = drumMax(el), i = drumIdx(el), v = i % max, k = el.dataset.k, u = el.dataset.u;
+  if (i < max || i >= (REP - 1) * max) { el.scrollTop = (Math.floor(REP / 2) * max + v) * IH; drumMark(el); }
+  if (S[k].run || !el.clientHeight) return; // pendant le décompte, c'est l'app qui fait tourner
+  if (S[k].set[u] !== v) { S[k].set[u] = v; save(k + "Set", S[k].set); }
+}
+function drumsInit(k, vals){
+  document.querySelectorAll(KIND[k].box + " .dv").forEach(el => {
+    el.addEventListener("scroll", () => { drumMark(el); clearTimeout(el._t); el._t = setTimeout(() => drumSettle(el), 140); }, { passive: true });
+    el.addEventListener("keydown", e => {
+      const d = e.key === "ArrowDown" ? 1 : e.key === "ArrowUp" ? -1 : 0;
+      if (!d || S[k].run) return; e.preventDefault();
+      const max = drumMax(el); drumSet(el, ((drumIdx(el) + d) % max + max) % max, true);
+    });
+    drumSet(el, vals[el.dataset.u], false);
+  });
+}
+/* Pendant le décompte : les roulettes tournent toutes seules. */
+function paintDrums(k, vals){
+  document.querySelectorAll(KIND[k].box + " .dv").forEach(el => {
+    if (!el.clientHeight) return;
+    const v = vals[el.dataset.u];
+    if (drumIdx(el) % drumMax(el) !== v && el._want !== v) { el._want = v; drumSet(el, v, true); }
+  });
+}
+/* Lit la valeur au centre (si on touche « Démarrer » pendant que la roulette tourne encore). */
+function readDrums(k){
+  document.querySelectorAll(KIND[k].box + " .dv").forEach(el => { if (el.clientHeight) S[k].set[el.dataset.u] = drumIdx(el) % drumMax(el); });
+  save(k + "Set", S[k].set);
+}
+const drumVals = k => k === "tm" ? (S.tm.run ? split(tmLeft()) : S.tm.set) : (S.al.run || S.al.set);
+/* Les roulettes cachées (page météo) ne peuvent pas se placer : on les replace au retour. */
+function placeDrums(){
+  ["tm", "al"].forEach(k => document.querySelectorAll(KIND[k].box + " .dv").forEach(el => { el._want = null; if (el.clientHeight) drumSet(el, drumVals(k)[el.dataset.u], false); }));
+}
+const histHTML = (k, list, run) => list.length ? '<div class="mh">Mémoire</div><div class="hist">' + list.map((x, i) =>
+  '<button type="button" class="chip" data-act="hist" data-k="' + k + '" data-i="' + i + '"' + (run ? " disabled" : "") + '>' + (k === "tm" ? fmtDur(x) : hhmm(x.h, x.m)) + '</button>').join("") + '</div>' : "";
+const tmLeft = () => Math.max(0, Math.ceil((S.tm.run.end - Date.now()) / 1000));
+const BG = " · sonne même si tu passes sur une autre app";
+function alStatus(){
+  const r = S.al.run;
+  if (!r) return "Fais tourner les roulettes vers le haut ou le bas.";
+  const mins = Math.max(0, Math.ceil((r.at - Date.now()) / 60000)), p = split(mins * 60);
+  return "Activée · sonne dans " + (p.h ? p.h + " h " + pad(p.m) : p.m + " min") + BG;
+}
+function renderTimer(){
+  const r = S.tm.run;
+  $("#tmBox").innerHTML = '<h2>Minuteur</h2>' + drumsHTML("tm", r) +
+    '<p class="tstat" id="tmStat">' + (r ? "En cours · sonne à " + new Date(r.end).toLocaleTimeString("fr-FR") + BG : "Fais tourner les roulettes vers le haut ou le bas.") + '</p>' +
+    '<div class="tctl"><button class="pri" type="button" data-act="tmStart"' + (r ? " disabled" : "") + '>Démarrer</button>' +
+    '<button class="danger" type="button" data-act="tmStop"' + (r ? "" : " disabled") + '>Arrêter</button></div>' + histHTML("tm", S.tm.hist, r);
+  drumsInit("tm", drumVals("tm"));
+}
+function renderAlarm(){
+  const r = S.al.run;
+  $("#alBox").innerHTML = '<h2>Alarme</h2>' + drumsHTML("al", r) +
+    '<p class="tstat" id="alStat">' + alStatus() + '</p>' +
+    '<div class="tctl"><button class="pri" type="button" data-act="alStart"' + (r ? " disabled" : "") + '>Activer</button>' +
+    '<button class="danger" type="button" data-act="alStop"' + (r ? "" : " disabled") + '>Arrêter</button></div>' + histHTML("al", S.al.hist, r);
+  drumsInit("al", drumVals("al"));
+}
+function tmStart(sec){
+  if (S.tm.run) return;
+  if (sec == null) { readDrums("tm"); sec = S.tm.set.h * 3600 + S.tm.set.m * 60 + S.tm.set.s; }
+  if (!sec) { $("#tmStat").textContent = "Règle d’abord une durée avec les roulettes."; return; }
+  S.tm.run = { end: Date.now() + sec * 1000, dur: sec }; save("tmRun", S.tm.run);
+  S.tm.hist = [sec].concat(S.tm.hist.filter(x => x !== sec)).slice(0, 4); save("tmHist", S.tm.hist);
+  renderTimer(); keepAwake(); bgAudio();
+}
+function tmStop(fromRing){ S.tm.run = null; del("tmRun"); renderTimer(); keepAwake(); if (!fromRing) bgAudio(); }
+function nextAt(h, m){ const d = new Date(); d.setHours(h, m, 0, 0); if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1); return d.getTime(); }
+function alStart(h, m){
+  if (S.al.run) return;
+  if (h == null) { readDrums("al"); h = S.al.set.h; m = S.al.set.m; }
+  S.al.run = { h, m, at: nextAt(h, m) }; save("alRun", S.al.run);
+  S.al.hist = [{ h, m }].concat(S.al.hist.filter(x => x.h !== h || x.m !== m)).slice(0, 4); save("alHist", S.al.hist);
+  renderAlarm(); keepAwake(); bgAudio();
+}
+function alStop(fromRing){ S.al.run = null; del("alRun"); renderAlarm(); keepAwake(); if (!fromRing) bgAudio(); }
+function useHist(k, i){
+  const x = S[k].hist[i]; if (x == null || S[k].run) return;
+  if (k === "tm") { S.tm.set = split(x); save("tmSet", S.tm.set); tmStart(x); }
+  else { S.al.set = { h: x.h, m: x.m }; save("alSet", S.al.set); alStart(x.h, x.m); }
+}
+function timersTick(){
+  const now = Date.now();
+  if (S.tm.run){
+    paintDrums("tm", split(tmLeft()));
+    if (now >= S.tm.run.end){
+      const late = now - S.tm.run.end, d = S.tm.run.dur;
+      tmStop(true);
+      ring("Minuteur terminé", "Temps écoulé : " + fmtDur(d) + (late > 600000 ? " (pendant que l’app était fermée)" : ""), late > 600000);
+    }
+  }
+  if (S.al.run){
+    const st = $("#alStat"), t = alStatus(); if (st && st.textContent !== t) st.textContent = t;
+    if (now >= S.al.run.at){
+      const late = now - S.al.run.at, r = S.al.run;
+      alStop(true);
+      ring("Alarme · " + hhmm(r.h, r.m), late > 600000 ? "Elle a sonné pendant que l’app était fermée." : "C’est l’heure !", late > 600000);
+    }
+  }
+}
+
+/* Sonnerie : un petit son « néon » généré dans la page (rien à télécharger). */
+let alarmAudio = null, ringing = false, ringT = 0, vibT = 0, beepSrc = "", quietSrc = "";
+function wavURL(sec, sample){
+  const sr = 22050, n = Math.round(sr * sec), dv = new DataView(new ArrayBuffer(44 + n * 2));
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) dv.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt "); dv.setUint32(16, 16, true);
+  dv.setUint16(20, 1, true); dv.setUint16(22, 1, true); dv.setUint32(24, sr, true); dv.setUint32(28, sr * 2, true);
+  dv.setUint16(32, 2, true); dv.setUint16(34, 16, true); w(36, "data"); dv.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) dv.setInt16(44 + i * 2, Math.max(-1, Math.min(1, sample(i / sr))) * 32767, true);
+  return URL.createObjectURL(new Blob([dv.buffer], { type: "audio/wav" }));
+}
+const tones = [[0, .13, 880], [.17, .30, 1175], [.34, .50, 1568]];
+const beepSample = t => { for (const [a, b, f] of tones) if (t >= a && t < b) return Math.sin(2 * Math.PI * f * t) * Math.min(1, (t - a) / .01, (b - t) / .02) * .85; return 0; };
+/* Son quasi muet (inaudible) joué en boucle pendant un décompte :
+   l'iPhone laisse tourner une page qui joue du son, même quand tu passes sur une autre app. */
+const quietSample = t => (Math.floor(t * 22050) % 2 ? 1 : -1) / 32767;
+function makeAudio(){
+  if (alarmAudio) return;
+  beepSrc = wavURL(1, beepSample); quietSrc = wavURL(2, quietSample);
+  alarmAudio = new Audio(); alarmAudio.preload = "auto"; alarmAudio.loop = true;
+  alarmAudio.setAttribute("playsinline", "");
+  alarmAudio.addEventListener("timeupdate", timersTick); // vérifie l'heure même quand l'app est en arrière-plan
+  if ("mediaSession" in navigator) try {
+    ["play", "pause", "stop", "seekbackward", "seekforward", "previoustrack", "nexttrack"].forEach(a => { try { navigator.mediaSession.setActionHandler(a, () => {}); } catch(_){} });
+  } catch(e){}
+}
+const needKeep = () => !!(S.tm.run || S.al.run);
+function setSrc(src){ if (alarmAudio.dataset.src !== src) { alarmAudio.dataset.src = src; alarmAudio.src = src; } }
+function playA(){ try { const p = alarmAudio.play(); if (p && p.catch) p.catch(() => {}); } catch(e){} }
+/* Infos affichées sur l'écran verrouillé / le centre de contrôle. */
+function mediaInfo(title){
+  if (!("mediaSession" in navigator)) return;
+  try {
+    if (!title && !needKeep()) { navigator.mediaSession.metadata = null; return; }
+    const parts = [];
+    if (S.tm.run) parts.push("Minuteur · " + new Date(S.tm.run.end).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" }));
+    if (S.al.run) parts.push("Alarme · " + hhmm(S.al.run.h, S.al.run.m));
+    if ("MediaMetadata" in window) navigator.mediaSession.metadata = new MediaMetadata({ title: title || parts.join(" · "), artist: "Néon Dashboard" });
+  } catch(e){}
+}
+/* Lance / arrête le son de fond selon qu'un minuteur ou une alarme tourne. */
+function bgAudio(){
+  if (ringing) return;
+  try {
+    if (navigator.audioSession) navigator.audioSession.type = "playback"; // sonne même en mode silencieux
+    if (needKeep()) { makeAudio(); setSrc(quietSrc); alarmAudio.muted = false; if (alarmAudio.paused) playA(); mediaInfo(); }
+    else if (alarmAudio) { alarmAudio.pause(); mediaInfo(); }
+  } catch(e){}
+}
+/* À chaque toucher : l'iPhone n'autorise le son que s'il a été « débloqué » par un geste. */
+function unlockAudio(){
+  try {
+    if (ringing) return;
+    if (needKeep()) { if (!alarmAudio || alarmAudio.paused) bgAudio(); return; }
+    if (alarmAudio) return;
+    if (navigator.audioSession) navigator.audioSession.type = "playback";
+    makeAudio(); setSrc(quietSrc); alarmAudio.muted = true;
+    const p = alarmAudio.play();
+    const done = () => { if (!ringing && !needKeep()) alarmAudio.pause(); alarmAudio.muted = false; };
+    if (p && p.then) p.then(done, () => { alarmAudio.muted = false; }); else done();
+  } catch(e){}
+}
+function ring(title, sub, silent){
+  ringing = !silent;
+  const o = $("#ring");
+  o.innerHTML = '<div class="rbox"><div class="rt">' + esc(title) + '</div><p class="note">' + esc(sub) + '</p>' +
+    '<button class="pri" type="button" data-act="ringStop">' + (silent ? "OK" : "Arrêter") + '</button></div>';
+  o.hidden = false;
+  if (silent) { bgAudio(); return; }
+  try { makeAudio(); setSrc(beepSrc); alarmAudio.loop = true; alarmAudio.muted = false; alarmAudio.currentTime = 0; playA(); } catch(e){}
+  mediaInfo(title + " · ouvre l’app pour arrêter");
+  if (navigator.vibrate) { const v = () => { try { navigator.vibrate([400, 200, 400]); } catch(_){} }; v(); vibT = setInterval(v, 1500); }
+  ringT = setTimeout(stopRing, 3 * 60000); // s'arrête seule au bout de 3 minutes
+  keepAwake();
+}
+function stopRing(){
+  ringing = false; clearTimeout(ringT); clearInterval(vibT);
+  try { if (alarmAudio) alarmAudio.pause(); if (navigator.vibrate) navigator.vibrate(0); } catch(e){}
+  const o = $("#ring"); o.hidden = true; o.innerHTML = "";
+  keepAwake(); bgAudio();
+}
+/* Garde l'écran allumé tant qu'un minuteur ou une alarme tourne (sinon l'iPhone met l'app en pause). */
+let wakeLock = null;
+async function keepAwake(){
+  const need = !!(S.tm.run || S.al.run || ringing);
+  try {
+    if (need && !wakeLock && "wakeLock" in navigator && !document.hidden) { wakeLock = await navigator.wakeLock.request("screen"); wakeLock.addEventListener("release", () => { wakeLock = null; }); }
+    else if (!need && wakeLock) { const l = wakeLock; wakeLock = null; await l.release(); }
+  } catch(e){}
+}
+
+/* ---------- Deezer : lecteur intégré à l'app ---------- */
+function dzParse(raw){
+  const s = String(raw || "").trim();
+  if (/^\d{4,}$/.test(s)) return { t: "playlist", id: s };
+  const m = /deezer\.com\/(?:[a-z]{2}(?:-[a-z]{2})?\/)?(playlist|album|track|artist)\/(\d+)/i.exec(s);
+  return m ? { t: m[1].toLowerCase(), id: m[2] } : null;
+}
+/* Recherche de playlists publiques par nom (l'API Deezer ne marche dans une page web qu'en « JSONP »). */
+function dzSearch(q){
+  return new Promise((res, rej) => {
+    const cb = "dzcb" + Date.now(), sc = document.createElement("script");
+    const clean = () => { clearTimeout(tm); try { delete window[cb]; } catch(e){ window[cb] = undefined; } sc.remove(); };
+    const tm = setTimeout(() => { clean(); rej(new Error("délai dépassé")); }, 9000);
+    window[cb] = j => { clean(); res((j && j.data) || []); };
+    sc.onerror = () => { clean(); rej(new Error("réseau")); };
+    sc.src = "https://api.deezer.com/search/playlist?q=" + encodeURIComponent(q) + "&limit=6&output=jsonp&callback=" + cb;
+    document.head.appendChild(sc);
+  });
+}
+/* Récupère nom + pochette de la playlist/album/titre (API Deezer en JSONP, comme la recherche). */
+function dzMeta(p){
+  return new Promise((res, rej) => {
+    const cb = "dzm" + Date.now(), sc = document.createElement("script");
+    const clean = () => { clearTimeout(tm); try { delete window[cb]; } catch(e){ window[cb] = undefined; } sc.remove(); };
+    const tm = setTimeout(() => { clean(); rej(new Error("délai dépassé")); }, 9000);
+    window[cb] = j => {
+      clean();
+      if (!j || j.error) return rej(new Error("introuvable"));
+      const img = j.picture_big || j.picture_medium || j.cover_big || j.cover_medium || (j.album && (j.album.cover_big || j.album.cover_medium)) || "";
+      const sub = p.t === "playlist" ? [(j.creator && j.creator.name) || "", j.nb_tracks ? j.nb_tracks + " titres" : ""].filter(Boolean).join(" · ") : ((j.artist && j.artist.name) || "");
+      res({ img, name: j.title || j.name || "", sub });
+    };
+    sc.onerror = () => { clean(); rej(new Error("réseau")); };
+    sc.src = "https://api.deezer.com/" + p.t + "/" + p.id + "?output=jsonp&callback=" + cb;
+    document.head.appendChild(sc);
+  });
+}
+function dzPaintHead(p){
+  const el = $("#dzhead"); if (!el) return;
+  el.innerHTML = p.img ? '<img src="' + esc(p.img) + '" alt=""><div><b>' + esc(p.name || "") + '</b><small>' + esc(p.sub || "") + '</small></div>' : "";
+}
+function dzHead(){
+  const p = load("dzPl"); if (!p) return;
+  dzPaintHead(p);
+  if (p.img) return;
+  dzMeta(p).then(m => {
+    const cur = load("dzPl");
+    if (!cur || cur.t !== p.t || cur.id !== p.id) return;
+    const n = Object.assign({}, cur, m); save("dzPl", n); dzPaintHead(n);
+  }).catch(() => {});
+}
+const dzTitle = '<h2>Ma playlist Deezer</h2>';
+function dzForm(msg){
+  $("#dzBox").innerHTML = dzTitle +
+    (msg ? '<p class="note">' + msg + '</p>' : '<p class="note">Colle le lien de ta playlist (dans Deezer : ta playlist → <b>•••</b> → <b>Partager</b> → <b>Copier le lien</b>), ou écris son nom pour la chercher.</p>') +
+    '<form id="dzf" class="rowf"><input id="dzi" placeholder="Lien ou nom de la playlist" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false"><button class="pri" type="submit">OK</button></form>' +
+    '<div id="dzres"></div>' + (load("dzPl") ? '<button type="button" data-act="dzBack">Annuler</button>' : '');
+}
+function renderDeezer(){
+  const p = load("dzPl");
+  if (!p) return dzForm();
+  const src = "https://widget.deezer.com/widget/dark/" + p.t + "/" + p.id + "?tracklist=true&radius=true";
+  const cur = $("#dzBox iframe");
+  if (cur && cur.dataset.src === src) return; // ne recharge pas le lecteur (la musique continue)
+  $("#dzBox").innerHTML = dzTitle + '<div class="dzhead" id="dzhead"></div>' +
+    '<iframe data-src="' + esc(src) + '" src="' + esc(src) + '" title="Lecteur Deezer" allow="encrypted-media; clipboard-write; autoplay" loading="lazy"></iframe>' +
+    '<div class="tctl"><button class="dzb" type="button" data-act="dzApp">Ouvrir dans l’app Deezer</button><button type="button" data-act="dzChange">Changer</button></div>' +
+    '<p class="note tiny" style="margin:10px 0 0">Lance la lecture depuis le lecteur : la playlist joue ici, sans quitter l’app. Si tu n’entends que des extraits de 30 s, c’est une limite de Deezer pour les lecteurs intégrés : utilise alors « Ouvrir dans l’app Deezer ».</p>';
+  dzHead();
+}
+async function dzSubmit(raw){
+  const v = String(raw || "").trim(); if (!v) return;
+  const p = dzParse(v);
+  if (p) { save("dzPl", p); renderDeezer(); return; }
+  if (/link\.deezer\.com|page\.link|deezer\.page/i.test(v))
+    return dzForm('Ce lien court ne contient pas le numéro de la playlist. Écris plutôt le <b>nom</b> de ta playlist ci-dessous pour la retrouver, ou ouvre <b>deezer.com</b> dans Safari et copie l’adresse de la playlist (elle contient « /playlist/ » suivi de chiffres).');
+  $("#dzres").innerHTML = '<p class="note">Recherche…</p>';
+  try {
+    const list = await dzSearch(v);
+    $("#dzres").innerHTML = list.length ? list.map(x =>
+      '<button type="button" class="dzr" data-act="dzPick" data-id="' + x.id + '"><img src="' + esc(x.picture_small || "") + '" alt=""><span><b>' + esc(x.title) + '</b><small>' +
+      esc((x.user && x.user.name) || "") + ' · ' + x.nb_tracks + ' titres</small></span></button>').join("") +
+      '<p class="note tiny" style="margin-top:8px">Ta playlist n’apparaît pas ? Elle est peut-être privée : dans Deezer, rends-la publique, ou colle son lien complet.</p>'
+      : '<p class="note">Aucune playlist publique trouvée pour « ' + esc(v) + ' ».</p>';
+  } catch(e){ $("#dzres").innerHTML = '<p class="note">Recherche impossible (' + esc(e.message) + '). Colle plutôt le lien complet de la playlist.</p>'; }
+}
+function dzOpenApp(){
+  const p = load("dzPl"); if (!p) return;
+  const path = "www.deezer.com/" + p.t + "/" + p.id, web = "https://" + path;
+  if (isAndroid) location.href = "intent://" + path + "#Intent;scheme=deezer;package=deezer.android.app;S.browser_fallback_url=" + encodeURIComponent(web) + ";end";
+  else if (isIOS) openApp("deezer://" + path, web, "Deezer");
+  else window.open(web, "_blank", "noopener");
+}
+
+/* Boutons des nouveaux panneaux */
+document.addEventListener("click", e => {
+  const a = e.target.closest("a[data-tw]");
+  if (a && (isIOS || isAndroid)) { e.preventDefault(); openTwitch(a.dataset.tw); return; }
+  const t = e.target.closest("[data-act]"); if (!t) return;
+  const act = t.dataset.act;
+  if (act === "tmStart") return tmStart();
+  if (act === "tmStop") return tmStop();
+  if (act === "alStart") return alStart();
+  if (act === "alStop") return alStop();
+  if (act === "hist") return useHist(t.dataset.k, +t.dataset.i);
+  if (act === "ringStop") return stopRing();
+  if (act === "dzApp") return dzOpenApp();
+  if (act === "dzChange") return dzForm();
+  if (act === "dzBack") { $("#dzBox").innerHTML = ""; return renderDeezer(); }
+  if (act === "dzPick") { save("dzPl", { t: "playlist", id: t.dataset.id }); return renderDeezer(); }
+});
+document.addEventListener("pointerdown", unlockAudio);
+
+/* ---------- Navigation & démarrage ---------- */
+$("#wcard").onclick = () => { if (current) go("detail"); else fallback(); };
+$("#back").onclick = () => go("home");
+$("#gear").onclick = openSettings;
+$("#loc").onclick = locate;
+$("#f").addEventListener("submit", () => { const v = $("#q").value.trim(); if (v) { searchAndShow(v); $("#q").blur(); } });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  tick(); loadTwitch(); timersTick(); keepAwake(); placeDrums();
+  const p = load("place"); if (p) show(p);
+});
+document.addEventListener("click", e => {
+  if (e.target.closest('[data-act="twlogin"]')) twLogin();
+  if (e.target.closest('[data-act="twforce"]')) twLogin(true);
+  if (e.target.closest('[data-act="twcopy"]')) twCopy();
+});
+
+function go(v){ $("#home").hidden = v !== "home"; $("#detail").hidden = v !== "detail"; $("#wxbg").hidden = v !== "detail"; window.scrollTo(0, 0); if (v === "home") placeDrums(); }
+
+del("theme"); // ancienne couleur choisie : on revient toujours à la couleur de base
+setName(); tick(); setInterval(tick, 1000);
+renderNotes();
+if (!load("name")) askName();
+loadTwitch(); setInterval(() => { if (!document.hidden) loadTwitch(); }, 60000);
+const saved = load("place");
+saved ? show(saved) : locate();
+renderTimer(); renderAlarm(); renderDeezer();
+setInterval(timersTick, 250); timersTick(); keepAwake();
+</script>
+</body>
+</html>
